@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../blockchain.php');
+require_once(__DIR__.'/../blockChain/blockchain.php');
 
 /*
 Hack the chain, changing values in the first block.

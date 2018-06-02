@@ -1,5 +1,5 @@
 <?php
-require_once("./block.php");
+require_once("block.php");
 
 /**
  * A simple blockchain class with proof-of-work (mining).
@@ -74,4 +74,56 @@ class BlockChain
 
         return true;
     }
+	
+	/**
+	 * validateTransaction:
+	 * - acquires an address, and checks all the transactions this address went through
+	 *   to determine if they have the valid amount to send
+	 */
+	public function validateTransaction($checkingAddress, $checkingAmount, $currentAmount = 0, $currentIndex = 0)
+	{
+		$reverseIndex = (count($this->chain) - 1) - $currentIndex;
+		$reverseIndex = $reverseIndex < 0 ? 0 : $reverseIndex;
+		$currentTransaction = $this->chain[$reverseIndex]->data;
+		
+		if ($currentTransaction instanceof Transaction)
+		{
+			$currentAmount = $currentAmount + $currentTransaction->acquirePayment($checkingAddress);
+		}
+		
+		// if address has enough funds, return true
+		if ($currentAmount >= $checkingAmount)
+		{
+			return true;
+		}
+		
+		// if first block is reached and checking amount is still too high,
+		// checking amount is invalid
+		if ($currentIndex >= count($this->chain))
+		{
+			return false;
+		}
+		
+		return $this->validateTransaction($checkingAddress, $checkingAmount, $currentAmount, $currentIndex + 1);
+	}
+	
+	
+	public function acquireBalance($checkingAddress, $currentAmount = 0, $currentIndex = 0)
+	{
+		$reverseIndex = (count($this->chain) - 1) - $currentIndex;
+		$reverseIndex = $reverseIndex < 0 ? 0 : $reverseIndex;
+		$currentTransaction = $this->chain[$reverseIndex]->data;
+		
+		if ($currentTransaction instanceof Transaction)
+		{
+			$currentAmount = $currentAmount + $currentTransaction->acquirePayment($checkingAddress);
+		}
+		
+		if ($currentIndex >= count($this->chain))
+		{
+			return $currentAmount;
+		}
+		
+		return $this->acquireBalance($checkingAddress, $currentAmount, $currentIndex + 1);
+	}
 }

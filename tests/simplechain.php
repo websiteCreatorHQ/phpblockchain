@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../blockchain.php');
+require_once(__DIR__.'/../blockChain/blockchain.php');
 
 /*
 Set up a simple chain and mine two blocks.
