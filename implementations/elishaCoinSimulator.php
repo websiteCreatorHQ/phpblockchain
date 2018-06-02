@@ -4,7 +4,7 @@ require_once(__DIR__.'/../utilities.php');
 
 
 /*
-Set up a simple chain and mine blocks.
+	Set up a simple chain and mine blocks.
 */
 
 echo "##################################################\n";
@@ -25,8 +25,13 @@ $computer1Address = "computer1";
 $computer2Address = "computer2";
 
 
-
+// data that will be pushed into the blockchain
 $newTransaction;
+/*
+	generateTransaction:
+	- simulates two computers transferring funds to each other,
+	  will only continue if the computer sending funds has enough funds to send
+*/
 function generateTransaction($currentChain, $address1, $address2, $minerAddress)
 {
 	$result;
@@ -137,6 +142,7 @@ echo "\n";
 
 while (true)
 {
+	// show available funds
 	echo "~  FUNDS  ~\n";
 	echo "	".$computer1Address;
 	echo "\n 	: ".$elishaCoin->acquireBalance($computer1Address)." elisha coins\n";
@@ -145,12 +151,14 @@ while (true)
 	echo "	".$userAddress;
 	echo "\n 	: ".$elishaCoin->acquireBalance($userAddress)." elisha coins\n\n";
 	
+	// computers will make new transaction
 	$newTransaction = generateTransaction($elishaCoin, $computer1Address, $computer2Address, $userAddress);
 	
 	echo "\n";
 	echo ">>> Press enter to mine transaction";
 	echo fgets(STDIN);
 	
+	// mine the transaction
 	printLine(" - Mining block $coinNo...");
 	$elishaCoin->push(new Block($coinNo, strtotime("now"), $newTransaction));
 
@@ -159,5 +167,4 @@ while (true)
 	printLine(" - You have earned 12.5 elisha coins.");
 
 	$coinNo = $coinNo + 1;
-
 }

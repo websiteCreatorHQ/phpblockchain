@@ -108,6 +108,11 @@ class BlockChain
 	}
 	
 	
+	/**
+	 * acquireBalance:
+	 * - acquires an address, and checks all the transactions this address went through,
+	 *   adding all the funds that were gained or lost, and returns that result
+	 */
 	public function acquireBalance($checkingAddress, $currentAmount = 0, $currentIndex = 0)
 	{
 		$reverseIndex = (count($this->chain) - 1) - $currentIndex;
