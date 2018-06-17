@@ -12,6 +12,8 @@ class BlockChain
     public function __construct()
     {
         $this->chain = [$this->createGenesisBlock()];
+		
+		// TODO: increase if more computers are used
         $this->difficulty = 4;
     }
 

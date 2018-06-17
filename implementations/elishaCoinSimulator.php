@@ -31,6 +31,9 @@ $newTransaction;
 	generateTransaction:
 	- simulates two computers transferring funds to each other,
 	  will only continue if the computer sending funds has enough funds to send
+	- TODO:
+		- Add option to add invalid transaction
+		- Create threads for other miners to reject that block
 */
 function generateTransaction($currentChain, $address1, $address2, $minerAddress)
 {
@@ -41,8 +44,8 @@ function generateTransaction($currentChain, $address1, $address2, $minerAddress)
 		$coin = rand(0,2);
 		$newAmount = rand(0,2000);
 		
-		$payer = ($coin == 0 ? $address1 : $address2);
-		$payee = ($coin == 0 ? $address2 : $address1);
+		$payer = ($coin > 1 ? $address1 : $address2);
+		$payee = ($coin > 1 ? $address2 : $address1);
 		
 		$result = new Transaction
 		(
@@ -50,38 +53,62 @@ function generateTransaction($currentChain, $address1, $address2, $minerAddress)
 			(
 				new Payment
 				(
-					$payer, 
-					-$newAmount
+					$payer,
+					- $newAmount
 				)
 				,
 				new Payment
 				(
-					$payee, 
+					$payee,
 					$newAmount
 				)
 				,
-				// transaction fee to mine coins
 				new Payment
 				(
-					$minerAddress, 
+					$minerAddress,
 					12.5
 				)
 			)
 		);
 		
-		echo " - $payer wants to send $newAmount elisha coins to $payee.\n";
-		
-		$canProceed = $currentChain->validateTransaction($payer, $newAmount);
-		if (!$canProceed)
-		{
-			echo "!!!   But $payer does not have enough funds to do so.   !!!\n\n";
-			echo ">>> Press enter to continue";
-			echo fgets(STDIN);
-			echo "\n";
-		}
+		echo 
+" 
+ - MESSAGE RECIEVED:
+   $payer wants to send $newAmount elisha coins to $payee.\n
+";
+		echo ">>> Press enter to verify this unconfirmed transaction";
+		echo fgets(STDIN);
+			
+		$canProceed = verifyUnconfirmedTransaction($currentChain, $payer, $newAmount);
 	}
 	
 	return $result;
+}
+
+function verifyUnconfirmedTransaction($currentChain, $payer, $newAmount)
+{
+	$passedAllTests = true;
+	
+	echo " - Checking if $payer has $newAmount elisha coins or more ...\n";
+	if (!$currentChain->validateTransaction($payer, $newAmount))
+	{
+		$passedAllTests = false;
+		echo "   [FAILED] : $payer does not have enough funds.\n\n";
+		echo ">>> Press enter to reject this unconfirmed transaction";
+		echo fgets(STDIN);
+		echo "\n";
+	}
+	else
+	{
+		echo "   [PASSED]!\n\n";
+	}
+	
+	if ($passedAllTests)
+	{
+		echo "\n   This transaction has passed all the verification tests!\n";
+	}
+	
+	return $passedAllTests;
 }
 
 
@@ -155,7 +182,7 @@ while (true)
 	$newTransaction = generateTransaction($elishaCoin, $computer1Address, $computer2Address, $userAddress);
 	
 	echo "\n";
-	echo ">>> Press enter to mine transaction";
+	echo ">>> Press enter to confirm and mine transaction";
 	echo fgets(STDIN);
 	
 	// mine the transaction
